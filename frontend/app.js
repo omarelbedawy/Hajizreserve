@@ -1,146 +1,160 @@
-// Automatically uses local server when testing, or relative URL when live on Vercel
+// Automatically uses local server during dev, or relative paths when deployed on Vercel
 const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:3000'
   : '';
 
 document.addEventListener('DOMContentLoaded', () => {
   const bookingForm = document.getElementById('booking-form');
-  const checkStatusBtn = document.getElementById('check-status-btn');
+  const verifyForm = document.getElementById('verify-form');
 
-  if (bookingForm) {
-    bookingForm.addEventListener('submit', handleCreateBooking);
-  }
+  // Handle CTA Smooth Scrolling
+  document.querySelectorAll('[data-goto]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const targetId = e.target.getAttribute('data-goto');
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) targetEl.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
 
-  // Handle URL verification view if someone visits /verify/CODE
+  // Handle Forms
+  if (bookingForm) bookingForm.addEventListener('submit', handleRegisterBooking);
+  if (verifyForm) verifyForm.addEventListener('submit', handleVerifyBooking);
+
+  // Check if someone visited /verify/CODE directly in the URL
   const path = window.location.pathname;
   if (path.startsWith('/verify/')) {
     const code = path.split('/verify/')[1];
     if (code) {
-      loadVerificationDetails(code);
+      const verifySection = document.getElementById('verify');
+      if (verifySection) verifySection.scrollIntoView({ behavior: 'smooth' });
+      executeVerification(code);
     }
   }
 });
 
 /**
- * Creates a new booking and triggers instant live verification
+ * 1. REGISTER BOOKING
  */
-async function handleCreateBooking(e) {
+async function handleRegisterBooking(e) {
   e.preventDefault();
 
-  const submitBtn = e.target.querySelector('button[type="submit"]');
-  const originalBtnText = submitBtn ? submitBtn.innerText : 'Submit';
+  const form = e.target;
+  const formData = new FormData(form);
+  
+  const errorEl = document.getElementById('register-error');
+  const resultCard = document.getElementById('register-result');
+  const codeEl = document.getElementById('register-code');
+  const submitBtn = form.querySelector('button[type="submit"]');
+
+  // Reset UI State
+  if (errorEl) { errorEl.hidden = true; errorEl.innerText = ''; }
+  if (resultCard) resultCard.hidden = true;
   if (submitBtn) submitBtn.innerText = 'Checking Flight Radar...';
 
-  const formData = {
-    pilgrim_name: document.getElementById('pilgrim_name').value.trim(),
-    pilgrim_email: document.getElementById('pilgrim_email').value.trim(),
-    flight_iata: document.getElementById('flight_iata').value.trim(),
-    flight_date: document.getElementById('flight_date').value,
-    hotel_name: document.getElementById('hotel_name').value.trim(),
-    hotel_email: document.getElementById('hotel_email').value.trim(),
-    booking_reference: document.getElementById('booking_reference')?.value.trim() || ''
+  const payload = {
+    pilgrim_name: formData.get('pilgrim_name')?.trim(),
+    pilgrim_email: formData.get('pilgrim_email')?.trim() || '',
+    flight_iata: formData.get('flight_iata')?.trim(),
+    flight_date: formData.get('flight_date'),
+    hotel_name: formData.get('hotel_name')?.trim(),
+    hotel_email: formData.get('hotel_email')?.trim(),
+    booking_reference: formData.get('booking_reference')?.trim() || ''
   };
 
   try {
     const response = await fetch(`${API_BASE_URL}/bookings`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
+      body: JSON.stringify(payload)
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error || 'Failed to create booking');
+      throw new Error(data.error || 'Failed to register booking');
     }
 
-    alert(`Booking created successfully! Status: ${data.status.toUpperCase()}`);
-    displayBookingResult(data);
-    bookingForm.reset();
+    // Display Verification Code
+    if (codeEl) codeEl.innerText = data.verification_code || 'SUCCESS';
+    if (resultCard) resultCard.hidden = false;
+    
+    form.reset();
 
   } catch (err) {
-    alert(`Error: ${err.message}`);
+    if (errorEl) {
+      errorEl.innerText = err.message;
+      errorEl.hidden = false;
+    } else {
+      alert(`Error: ${err.message}`);
+    }
   } finally {
-    if (submitBtn) submitBtn.innerText = originalBtnText;
+    if (submitBtn) submitBtn.innerText = 'Register booking';
   }
 }
 
 /**
- * Manually forces an immediate status re-check for a booking ID
+ * 2. VERIFY BOOKING (FORM TRIGGER)
  */
-async function triggerStatusCheck(bookingId) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/bookings/${bookingId}/check-status`);
-    const data = await response.json();
+async function handleVerifyBooking(e) {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const code = formData.get('code')?.trim();
 
-    if (!response.ok) throw new Error(data.error || 'Status check failed');
-
-    alert(`Flight Status Updated: ${data.status.toUpperCase()}`);
-    displayBookingResult(data);
-  } catch (err) {
-    alert(`Status Check Error: ${err.message}`);
+  if (code) {
+    executeVerification(code);
   }
 }
 
 /**
- * Displays booking status results on screen
+ * 3. EXECUTE VERIFICATION API LOOKUP
  */
-function displayBookingResult(booking) {
-  const resultContainer = document.getElementById('booking-result');
-  if (!resultContainer) return;
+async function executeVerification(code) {
+  const errorEl = document.getElementById('verify-error');
+  const resultContainer = document.getElementById('verify-result');
 
-  const isDelayed = booking.status === 'delayed_verified';
-  const isCancelled = booking.status === 'cancelled';
-
-  let statusBadge = '<span style="color: green; font-weight: bold;">ON TIME</span>';
-  if (isDelayed) {
-    statusBadge = `<span style="color: orange; font-weight: bold;">VERIFIED DELAYED (${booking.delay_minutes} mins)</span>`;
-  } else if (isCancelled) {
-    statusBadge = '<span style="color: red; font-weight: bold;">FLIGHT CANCELLED</span>';
-  } else if (booking.status === 'pending') {
-    statusBadge = '<span style="color: gray; font-weight: bold;">PENDING CHECK</span>';
+  if (errorEl) { errorEl.hidden = true; errorEl.innerText = ''; }
+  if (resultContainer) {
+    resultContainer.hidden = false;
+    resultContainer.innerHTML = '<p class="mono">Checking verification status...</p>';
   }
-
-  resultContainer.innerHTML = `
-    <div style="border: 1px solid #ccc; padding: 15px; border-radius: 8px; margin-top: 15px;">
-      <h3>Booking #${booking.id} - ${booking.pilgrim_name}</h3>
-      <p><b>Flight:</b> ${booking.flight_iata} on ${booking.flight_date.split('T')[0]}</p>
-      <p><b>Hotel:</b> ${booking.hotel_name} (${booking.hotel_email})</p>
-      <p><b>Status:</b> ${statusBadge}</p>
-      <p><b>Verification Code:</b> <code>${booking.verification_code}</code></p>
-      <button onclick="triggerStatusCheck(${booking.id})">Re-check Flight Radar Now</button>
-    </div>
-  `;
-}
-
-/**
- * Public Verification Page Loader (for hotel receptionists)
- */
-async function loadVerificationDetails(code) {
-  const container = document.getElementById('verify-container') || document.body;
-  container.innerHTML = '<h2>Verifying Flight Proof...</h2>';
 
   try {
     const response = await fetch(`${API_BASE_URL}/verify/${code}`);
     const data = await response.json();
 
-    if (!response.ok) throw new Error(data.error || 'Verification code invalid');
+    if (!response.ok) {
+      throw new Error(data.error || 'Verification code not found');
+    }
 
-    const statusTitle = data.verified
-      ? `<h1 style="color: green;">✔ VERIFIED FLIGHT DISRUPTION</h1>`
-      : `<h1>Flight Status: ${data.status.toUpperCase()}</h1>`;
+    const isDisrupted = data.verified;
+    const isCancelled = data.status === 'cancelled';
 
-    container.innerHTML = `
-      <div style="max-width: 500px; margin: 40px auto; padding: 20px; border: 2px solid #333; border-radius: 10px;">
-        ${statusTitle}
-        <p><b>Pilgrim:</b> ${data.pilgrim_name}</p>
-        <p><b>Flight:</b> ${data.flight_iata} (${data.flight_date.split('T')[0]})</p>
-        <p><b>Hotel Reserved:</b> ${data.hotel_name}</p>
-        <p><b>Delay:</b> ${data.delay_minutes} minutes</p>
-        <p><b>Last Checked:</b> ${new Date(data.checked_at).toLocaleString()}</p>
-      </div>
-    `;
+    let statusBadge = '<span style="color: green; font-weight: bold;">✔ ON TIME</span>';
+    if (isCancelled) {
+      statusBadge = '<span style="color: red; font-weight: bold;">❌ FLIGHT CANCELLED</span>';
+    } else if (isDisrupted) {
+      statusBadge = `<span style="color: orange; font-weight: bold;">⚠️ VERIFIED DELAYED (${data.delay_minutes} mins)</span>`;
+    }
+
+    if (resultContainer) {
+      resultContainer.innerHTML = `
+        <div style="padding: 10px 0;">
+          <h3>Status: ${statusBadge}</h3>
+          <p style="margin-top: 10px;"><b>Traveler:</b> ${data.pilgrim_name}</p>
+          <p><b>Flight:</b> ${data.flight_iata} (${data.flight_date ? data.flight_date.split('T')[0] : ''})</p>
+          <p><b>Hotel:</b> ${data.hotel_name}</p>
+          <p><b>Last Inspection:</b> ${data.checked_at ? new Date(data.checked_at).toLocaleString() : 'N/A'}</p>
+        </div>
+      `;
+    }
+
   } catch (err) {
-    container.innerHTML = `<h2 style="color: red;">Verification Failed: ${err.message}</h2>`;
+    if (resultContainer) resultContainer.hidden = true;
+    if (errorEl) {
+      errorEl.innerText = err.message;
+      errorEl.hidden = false;
+    } else {
+      alert(`Error: ${err.message}`);
+    }
   }
 }
