@@ -1,0 +1,22 @@
+{
+  "name": "hajiz-backend",
+  "version": "1.0.0",
+  "description": "Hajiz MVP backend - flight delay verification for pilgrim hotel bookings",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+"start": "node server.js",
+  "dev": "nodemon server.js",
+    "migrate": "node migrations/run.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "pg": "^8.12.0",
+    "dotenv": "^16.4.5",
+    "axios": "^1.7.7",
+    "nodemailer": "^6.9.14",
+    "uuid": "^9.0.1",
+    "node-cron": "^3.0.3",
+    "cors": "^2.8.5"
+  }
+}

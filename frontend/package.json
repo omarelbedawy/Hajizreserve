@@ -1,0 +1,10 @@
+{
+  "name": "hajiz-frontend",
+  "version": "1.0.0",
+  "description": "Hajiz frontend - static site for registering and verifying flight-delay bookings",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  }
+}

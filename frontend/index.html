@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hajiz — Flight-delay proof, anywhere</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-row">
+    <div class="wordmark">HAJIZ<span class="wordmark-dot">.</span></div>
+    <div class="header-tag">flight-delay proof, anywhere in the world</div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow">Automatic · Independent · Free to check</p>
+      <h1>A late flight<br>shouldn't cost<br>you the room.</h1>
+      <p class="hero-sub">
+        Register a flight before you fly. We watch it against live data, and the moment
+        a delay is confirmed we send the hotel proof automatically — no calls, no
+        screenshots, no argument at the front desk.
+      </p>
+      <div class="hero-ctas">
+        <button class="btn btn-primary" data-goto="register">Register a booking</button>
+        <button class="btn btn-ghost" data-goto="verify">Verify a booking</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="how" id="how">
+  <div class="wrap">
+    <h2 class="section-title">How it works</h2>
+    <div class="how-grid">
+      <div class="how-step">
+        <div class="how-num">01</div>
+        <h3>Register the flight</h3>
+        <p>Before departure, enter the flight number, date, and the hotel that needs to know if things go sideways.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-num">02</div>
+        <h3>We watch it for you</h3>
+        <p>Our system checks the flight automatically once it's underway. No app to open, nothing to remember.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-num">03</div>
+        <h3>Proof, if it's needed</h3>
+        <p>If the delay clears the threshold, the hotel gets an email with a verification code they can check anytime, themselves.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="panel-section" id="register">
+  <div class="wrap panel-grid">
+    <div class="panel-intro">
+      <h2 class="section-title">Register a booking</h2>
+      <p>Do this before the flight departs. You'll get a verification code back — save it, it's what the hotel will use to confirm everything themselves.</p>
+    </div>
+
+    <form class="card form-card" id="booking-form">
+      <div class="field-row">
+        <label>Traveler name
+          <input type="text" name="pilgrim_name" required placeholder="Full name">
+        </label>
+        <label>Traveler email <span class="optional">optional</span>
+          <input type="email" name="pilgrim_email" placeholder="name@example.com">
+        </label>
+      </div>
+      <div class="field-row">
+        <label>Flight number
+          <input type="text" name="flight_iata" required placeholder="e.g. BA117">
+        </label>
+        <label>Flight date
+          <input type="date" name="flight_date" required>
+        </label>
+      </div>
+      <div class="field-row">
+        <label>Hotel name
+          <input type="text" name="hotel_name" required placeholder="e.g. Grand Meridian Hotel">
+        </label>
+        <label>Hotel email
+          <input type="email" name="hotel_email" required placeholder="reservations@hotel.com">
+        </label>
+      </div>
+      <label class="full-width">Booking reference <span class="optional">optional</span>
+        <input type="text" name="booking_reference" placeholder="Hotel's own reservation number">
+      </label>
+
+      <button type="submit" class="btn btn-primary btn-block">Register booking</button>
+      <p class="form-error" id="register-error" hidden></p>
+    </form>
+
+    <div class="card result-card" id="register-result" hidden>
+      <div class="stamp-code" id="register-code-label">Verification code</div>
+      <div class="code" id="register-code">--------</div>
+      <p>Give this code to the traveler, or the hotel will receive it directly by email if a delay is confirmed. Anyone can check status any time at <span class="mono">/verify/&lt;code&gt;</span>.</p>
+    </div>
+  </div>
+</section>
+
+<section class="panel-section panel-alt" id="verify">
+  <div class="wrap panel-grid">
+    <div class="panel-intro">
+      <h2 class="section-title">Verify a booking</h2>
+      <p>For hotel staff. Enter the code from the traveler or the notification email — no login required.</p>
+    </div>
+
+    <form class="card form-card" id="verify-form">
+      <label class="full-width">Verification code
+        <input type="text" name="code" required placeholder="e.g. A1B2C3D4" class="mono-input" autocapitalize="characters">
+      </label>
+      <button type="submit" class="btn btn-primary btn-block">Check status</button>
+      <p class="form-error" id="verify-error" hidden></p>
+    </form>
+
+    <div class="card verify-result" id="verify-result" hidden></div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>Hajiz — automated flight-delay verification for any hotel booking, anywhere.</span>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

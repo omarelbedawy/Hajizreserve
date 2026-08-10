@@ -1,0 +1,37 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "backend/src/server.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "frontend/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/bookings(.*)",
+      "dest": "backend/src/server.js"
+    },
+    {
+      "src": "/verify(.*)",
+      "dest": "backend/src/server.js"
+    },
+    {
+      "src": "/api(.*)",
+      "dest": "backend/src/server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "frontend/$1"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron-check",
+      "schedule": "*/15 * * * *"
+    }
+  ]
+}
