@@ -24,7 +24,7 @@ jobs:
           cd backend
           npm ci
 
-      - name: Check syntax and run linter
+      - name: Check syntax
         run: |
           cd backend
-          node --check server.js
+          node --check src/server.js   # <-- Updated path here!
