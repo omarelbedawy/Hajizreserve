@@ -9,12 +9,18 @@ const pool = new Pool({
 });
 
 async function migrate() {
-  const sqlPath = path.join(__dirname, '001_init.sql');
-  const sql = fs.readFileSync(sqlPath, 'utf8');
+  const files = fs
+    .readdirSync(__dirname)
+    .filter((f) => f.endsWith('.sql'))
+    .sort(); // 001_..., 002_..., etc. run in order
 
-  console.log('Running migration: 001_init.sql ...');
-  await pool.query(sql);
-  console.log('✅ Migration complete. "bookings" table is ready.');
+  for (const file of files) {
+    const sql = fs.readFileSync(path.join(__dirname, file), 'utf8');
+    console.log(`Running migration: ${file} ...`);
+    await pool.query(sql);
+  }
+
+  console.log('✅ Migrations complete. "bookings" table is up to date.');
 
   await pool.end();
 }

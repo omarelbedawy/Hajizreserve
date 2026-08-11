@@ -52,8 +52,8 @@ async function handleRegisterBooking(e) {
   if (submitBtn) submitBtn.innerText = 'Checking Flight Radar...';
 
   const payload = {
-    pilgrim_name: formData.get('pilgrim_name')?.trim(),
-    pilgrim_email: formData.get('pilgrim_email')?.trim() || '',
+    traveler_name: formData.get('traveler_name')?.trim(),
+    traveler_email: formData.get('traveler_email')?.trim() || '',
     flight_iata: formData.get('flight_iata')?.trim(),
     flight_date: formData.get('flight_date'),
     hotel_name: formData.get('hotel_name')?.trim(),
@@ -140,7 +140,7 @@ async function executeVerification(code) {
       resultContainer.innerHTML = `
         <div style="padding: 10px 0;">
           <h3>Status: ${statusBadge}</h3>
-          <p style="margin-top: 10px;"><b>Traveler:</b> ${data.pilgrim_name}</p>
+          <p style="margin-top: 10px;"><b>Traveler:</b> ${data.traveler_name}</p>
           <p><b>Flight:</b> ${data.flight_iata} (${data.flight_date ? data.flight_date.split('T')[0] : ''})</p>
           <p><b>Hotel:</b> ${data.hotel_name}</p>
           <p><b>Last Inspection:</b> ${data.checked_at ? new Date(data.checked_at).toLocaleString() : 'N/A'}</p>

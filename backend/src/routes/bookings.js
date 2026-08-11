@@ -15,12 +15,12 @@ const FLIGHT_IATA_REGEX = /^[A-Z0-9]{2}\d{1,4}[A-Z]?$/;
  */
 router.post('/bookings', async (req, res) => {
   try {
-    const { pilgrim_name, pilgrim_email, flight_date, hotel_name, hotel_email, booking_reference } = req.body;
+    const { traveler_name, traveler_email, flight_date, hotel_name, hotel_email, booking_reference } = req.body;
     let { flight_iata } = req.body;
 
-    if (!pilgrim_name || !flight_iata || !flight_date || !hotel_name || !hotel_email) {
+    if (!traveler_name || !flight_iata || !flight_date || !hotel_name || !hotel_email) {
       return res.status(400).json({
-        error: 'Missing required fields: pilgrim_name, flight_iata, flight_date, hotel_name, hotel_email',
+        error: 'Missing required fields: traveler_name, flight_iata, flight_date, hotel_name, hotel_email',
       });
     }
 
@@ -44,10 +44,10 @@ router.post('/bookings', async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO bookings
-        (pilgrim_name, pilgrim_email, flight_iata, flight_date, hotel_name, hotel_email, booking_reference, verification_code)
+        (traveler_name, traveler_email, flight_iata, flight_date, hotel_name, hotel_email, booking_reference, verification_code)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
        RETURNING *`,
-      [pilgrim_name, pilgrim_email, flight_iata, cleanFlightDate, hotel_name, hotel_email, booking_reference, verification_code]
+      [traveler_name, traveler_email, flight_iata, cleanFlightDate, hotel_name, hotel_email, booking_reference, verification_code]
     );
 
     const newBooking = result.rows[0];
@@ -100,7 +100,7 @@ router.get('/verify/:code', async (req, res) => {
     const isVerifiedDisruption = booking.status === 'delayed_verified' || booking.status === 'cancelled';
 
     res.json({
-      pilgrim_name: booking.pilgrim_name,
+      traveler_name: booking.traveler_name,
       flight_iata: booking.flight_iata,
       flight_date: booking.flight_date,
       hotel_name: booking.hotel_name,

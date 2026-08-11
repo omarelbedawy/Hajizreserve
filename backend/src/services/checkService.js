@@ -1,6 +1,6 @@
 const pool = require('../db');
 const { getFlightStatus } = require('./airlabs');
-const { sendDelayProofEmail, sendPilgrimNotificationEmail } = require('./mailer');
+const { sendDelayProofEmail, sendTravelerNotificationEmail } = require('./mailer');
 
 const DELAY_THRESHOLD_MINUTES = parseInt(process.env.DELAY_THRESHOLD_MINUTES || '60', 10);
 
@@ -49,13 +49,13 @@ async function checkBookingStatus(bookingId) {
     // 1. Send official proof notice to the hotel
     await sendDelayProofEmail(updatedBooking);
 
-    // 2. Send confirmation notice to the traveler (if pilgrim email is provided)
-    if (updatedBooking.pilgrim_email) {
+    // 2. Send confirmation notice to the traveler (if traveler email is provided)
+    if (updatedBooking.traveler_email) {
       try {
-        await sendPilgrimNotificationEmail(updatedBooking);
+        await sendTravelerNotificationEmail(updatedBooking);
       } catch (userMailErr) {
         // Even if user's inbox bounces, hotel was successfully notified
-        console.error(`Could not send confirmation to pilgrim:`, userMailErr.message);
+        console.error(`Could not send confirmation to traveler:`, userMailErr.message);
       }
     }
 

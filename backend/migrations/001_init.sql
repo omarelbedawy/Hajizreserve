@@ -1,12 +1,12 @@
--- One row = one pilgrim's flight + hotel booking that we're "protecting"
+-- One row = one traveler's flight + hotel booking that we're "protecting"
 
 CREATE TABLE IF NOT EXISTS bookings (
     id                  SERIAL PRIMARY KEY,
-    pilgrim_name        TEXT NOT NULL,
-    pilgrim_email       TEXT,
+    traveler_name       TEXT NOT NULL,
+    traveler_email      TEXT,
 
     flight_iata         TEXT NOT NULL,      -- e.g. 'SV1' - the flight we watch
-    flight_date         DATE NOT NULL,      -- the date the pilgrim says they fly
+    flight_date         DATE NOT NULL,      -- the date the traveler says they fly
 
     hotel_name          TEXT NOT NULL,
     hotel_email         TEXT NOT NULL,      -- where we send the delay proof

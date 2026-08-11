@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
  * 1. Sends proof email to the HOTEL
  */
 async function sendDelayProofEmail(booking) {
-  const { hotel_email, hotel_name, pilgrim_name, flight_iata, delay_minutes, verification_code, status } = booking;
+  const { hotel_email, hotel_name, traveler_name, flight_iata, delay_minutes, verification_code, status } = booking;
   const verifyUrl = `${process.env.PUBLIC_APP_URL || 'http://localhost:3000'}/verify/${verification_code}`;
 
   const isCancelled = status === 'cancelled';
@@ -27,12 +27,12 @@ async function sendDelayProofEmail(booking) {
   await transporter.sendMail({
     from: `"Hajiz - Flight Verification" <${process.env.EMAIL_USER}>`,
     to: hotel_email,
-    subject: `Verified Flight ${disruptionType} - Booking for ${pilgrim_name}`,
+    subject: `Verified Flight ${disruptionType} - Booking for ${traveler_name}`,
     html: `
       <h2>Flight ${disruptionType} Verified by Hajiz</h2>
       <p>Dear ${hotel_name},</p>
       <p>
-        This is an automated notice confirming that pilgrim <b>${pilgrim_name}</b>'s
+        This is an automated notice confirming that traveler <b>${traveler_name}</b>'s
         flight <b>${flight_iata}</b> ${detailsText}.
       </p>
       <p>
@@ -48,10 +48,10 @@ async function sendDelayProofEmail(booking) {
 }
 
 /**
- * 2. Sends confirmation email to the TRAVELER / PILGRIM
+ * 2. Sends confirmation email to the TRAVELER
  */
-async function sendPilgrimNotificationEmail(booking) {
-  const { pilgrim_email, pilgrim_name, hotel_name, flight_iata, delay_minutes, verification_code, status } = booking;
+async function sendTravelerNotificationEmail(booking) {
+  const { traveler_email, traveler_name, hotel_name, flight_iata, delay_minutes, verification_code, status } = booking;
   const verifyUrl = `${process.env.PUBLIC_APP_URL || 'http://localhost:3000'}/verify/${verification_code}`;
 
   const isCancelled = status === 'cancelled';
@@ -61,10 +61,10 @@ async function sendPilgrimNotificationEmail(booking) {
 
   await transporter.sendMail({
     from: `"Hajiz Updates" <${process.env.EMAIL_USER}>`,
-    to: pilgrim_email,
+    to: traveler_email,
     subject: `Update: We've notified ${hotel_name} about your flight`,
     html: `
-      <h2>Good news, ${pilgrim_name}!</h2>
+      <h2>Good news, ${traveler_name}!</h2>
       <p>
         We detected a ${disruptionText}.
       </p>
@@ -82,4 +82,4 @@ async function sendPilgrimNotificationEmail(booking) {
   });
 }
 
-module.exports = { sendDelayProofEmail, sendPilgrimNotificationEmail };
+module.exports = { sendDelayProofEmail, sendTravelerNotificationEmail };
