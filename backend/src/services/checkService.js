@@ -75,12 +75,12 @@ async function checkBookingStatus(bookingId) {
  */
 async function runCheckSweep() {
   const { rows: activeBookings } = await pool.query(
-    `SELECT id FROM bookings
-     WHERE status IN ('pending', 'on_time')
-       AND email_sent_at IS NULL
-       AND flight_date <= CURRENT_DATE
-     ORDER BY flight_date ASC`
-  );
+  `SELECT id FROM bookings
+   WHERE status IN ('pending', 'on_time')
+     AND email_sent_at IS NULL
+     AND flight_date <= CURRENT_DATE
+   ORDER BY flight_date ASC`
+);
 
   console.log(`🔎 Auto-check sweep starting for ${activeBookings.length} booking(s)...`);
 
