@@ -59,12 +59,15 @@ a { color: inherit; }
 }
 
 .wordmark {
-  font-size: 1.3rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
 }
 
-.wordmark-dot { color: var(--brass-bright); }
+.wordmark-logo {
+  height: 32px;
+  width: auto;
+  display: block;
+}
 
 .header-tag {
   font-size: 0.8rem;
